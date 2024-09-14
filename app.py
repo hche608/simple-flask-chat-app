@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify, render_template
-import time
 
 app = Flask(__name__)
 
@@ -18,8 +17,6 @@ def send_message():
 @app.route('/poll_messages')
 def poll_messages():
     last_message_count = int(request.args.get('last_message_count', 0))
-    while len(messages) <= last_message_count:
-        time.sleep(1)
     return jsonify({'messages': messages[last_message_count:]})
 
 if __name__ == '__main__':

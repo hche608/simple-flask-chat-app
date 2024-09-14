@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Long Polling Demo</title>
+    <title>Flask Polling Demo</title>
 </head>
 <body>
-    <h1>Flask Long Polling Real-time Messaging</h1>
+    <h1>Flask Polling Real-time Messaging</h1>
     <input id="messageInput" type="text" placeholder="Type a message...">
     <button onclick="sendMessage()">Send</button>
     <ul id="messages"></ul>
@@ -18,14 +18,16 @@
             fetch(`/poll_messages?last_message_count=${lastMessageCount}`)
                 .then(response => response.json())
                 .then(data => {
-                    data.messages.forEach(message => {
-                        var item = document.createElement('li');
-                        item.textContent = message;
-                        document.getElementById('messages').appendChild(item);
-                        lastMessageCount++;
-                    });
-                    fetchMessages();
-                });
+                    if (data.messages) {
+                        data.messages.forEach(message => {
+                            var item = document.createElement('li');
+                            item.textContent = message;
+                            document.getElementById('messages').appendChild(item);
+                            lastMessageCount++;
+                        });
+                    }
+                })
+                .catch(error => console.error('Error fetching messages:', error));
         }
 
         function sendMessage() {
@@ -35,11 +37,16 @@
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({message: message})
-            });
-            input.value = '';
+            })
+            .then(response => response.json())
+            .then(() => {
+                input.value = '';
+            })
+            .catch(error => console.error('Error sending message:', error));
         }
 
-        fetchMessages();
+        // Poll for messages every 5 seconds
+        setInterval(fetchMessages, 5000);
     </script>
 </body>
 </html>
