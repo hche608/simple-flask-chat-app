@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Long Polling Demo</title>
+</head>
+<body>
+    <h1>Flask Long Polling Real-time Messaging</h1>
+    <input id="messageInput" type="text" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send</button>
+    <ul id="messages"></ul>
+
+    <script>
+        var lastMessageCount = 0;
+
+        function fetchMessages() {
+            fetch(`/poll_messages?last_message_count=${lastMessageCount}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.messages.forEach(message => {
+                        var item = document.createElement('li');
+                        item.textContent = message;
+                        document.getElementById('messages').appendChild(item);
+                        lastMessageCount++;
+                    });
+                    fetchMessages();
+                });
+        }
+
+        function sendMessage() {
+            var input = document.getElementById('messageInput');
+            var message = input.value;
+            fetch('/send_message', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message: message})
+            });
+            input.value = '';
+        }
+
+        fetchMessages();
+    </script>
+</body>
+</html>
